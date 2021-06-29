@@ -65,6 +65,9 @@
 	background-color: white;
 
 }
+.beca_grid_container:hover, .active {
+	background-color: whitesmoke;
+}
 .beca_results_about {
 	overflow: hidden;
 	line-height: 1.2em;
@@ -73,9 +76,6 @@
 }
 .red {
 	background-color: red;
-}
-.active {
-	background-color: whitesmoke;
 }
 .beca_loader_wrapper {
 	display: flex;
