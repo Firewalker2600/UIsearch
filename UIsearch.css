@@ -12,7 +12,10 @@
     outline: none;
     padding-left: 52px;
 }
-
+#beca_results_counter {
+	display: flex;
+	justify-content: center;
+}
 #beca_number_of_results {
 	margin: 10px;
 }
@@ -31,7 +34,7 @@
 	border: 0px;
 	border-radius: 26px;
 	margin-top: -20px;
-	max-width: max-content;
+	width: 100%;
 	max-height: 600px;
 	background-color: white;
 	transition: all 0.5s ease-in-out;
@@ -42,9 +45,6 @@
 	max-height: 500px;
 	overflow: auto;
 	border-radius: 26px;
-}
-.beca_active {
-	background-color: red;
 }
 .beca_main_image {
 	grid-row: 1/5;
@@ -77,3 +77,63 @@
 .active {
 	background-color: whitesmoke;
 }
+.beca_loader_wrapper {
+	display: flex;
+	justify-content: center;
+}
+.beca_loader {
+	display: inline-block;
+	position: relative;
+	width: 80px;
+	height: 60px;
+  }
+.beca_loader div {
+	position: absolute;
+	top: 33px;
+	width: 13px;
+	height: 13px;
+	border-radius: 50%;
+	background: rgb(255, 0, 0);
+	animation-timing-function: cubic-bezier(0, 1, 1, 0);
+  }
+  .beca_loader div:nth-child(1) {
+	left: 8px;
+	animation: lds-ellipsis1 0.6s infinite;
+  }
+  .beca_loader div:nth-child(2) {
+	left: 8px;
+	animation: lds-ellipsis2 0.6s infinite;
+  }
+  .beca_loader div:nth-child(3) {
+	left: 32px;
+	animation: lds-ellipsis2 0.6s infinite;
+  }
+  .beca_loader div:nth-child(4) {
+	left: 56px;
+	animation: lds-ellipsis3 0.6s infinite;
+  }
+  @keyframes lds-ellipsis1 {
+	0% {
+	  transform: scale(0);
+	}
+	100% {
+	  transform: scale(1);
+	}
+  }
+  @keyframes lds-ellipsis3 {
+	0% {
+	  transform: scale(1);
+	}
+	100% {
+	  transform: scale(0);
+	}
+  }
+  @keyframes lds-ellipsis2 {
+	0% {
+	  transform: translate(0, 0);
+	}
+	100% {
+	  transform: translate(24px, 0);
+	}
+  }
+  

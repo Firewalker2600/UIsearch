@@ -7,7 +7,13 @@
 		const keyC = "638cf5af3a1030ba2ff3fe9b5cdd828a"; //prod key
 		const interval = 500;
 		let typingTimer;
-		const client = new AddSearchClient(keyB);
+		let currentPage = 1;
+		let limit = 10;
+		let total = 0;
+		let url;
+		let loading = false;
+		const client = new AddSearchClient(keyC);
+		client.setPaging(1, limit, "relevance", "desc");
 		nsObj.doSearch = function() {
 			//console.log("search-button clicked");
 			client.search($("#beca_search_input").val(), nsObj.displayResults);
@@ -35,35 +41,76 @@
 		nsObj.moveDown = function () {
 			console.log("Down Arrow Pressed");
 		}
+		nsObj.toggleActive = function (element) {
+			url = element.find("a").prop("href");
+			element.toggleClass("active");
+			$(".active").on("click", function () {
+				window.location.href = url;
+			});
+			$(".active").on("keypress", function (e) {
+				if(e.keyCode === 13) {
+					window.location.href = url;
+				}
+			});
+		}	
 
 		// --- zobrazovaci funkce pro konstrukci šablony
 
 		nsObj.displayResults = function(res) {
-			nsObj.cb(res);
 			$("#beca_results_container").show();
+			$('#beca_results_list').empty();
+			nsObj.appendResults(res);
+		}
+		nsObj.hasMoreResults = function () {
+			return ((currentPage - 1) * limit + 1) < total;
+		}
+		nsObj.loadResults = async function () {
+			loading = true;
+			if(nsObj.hasMoreResults()) {
+				client.nextPage();
+				await client.search($("#beca_search_input").val(), nsObj.appendResults);
+				loading = false;
+			}
+			
+		}
+		nsObj.appendResults = function (res) {
+			total = res.total_hits || total;
+			currentPage = res.page || currentPage;
 			$("#beca_number_of_results").empty().append(
-				(res.total_hits && res.total_hits > 0)
-					? `${res.page * 1} - ${res.page * 10} z celkem ${res.total_hits} výsledků.`
+				(total > 0)
+					? `${currentPage * limit} z ${total} výsledků.`
 					: `<h6>Žádný výsledek nenalezen.</h6>`
 			);
-			$('#beca_results_list').empty();
-			if(res.total_hits && res.total_hits > 0) {
+			if(total > 0) {
 				res.hits.forEach(nsObj.buildRow);
-				$(".beca_grid_container").hover(function() {
-					$(this).toggleClass("active");
-				});
+				$(".beca_loader_wrapper").detach();
+				$("#beca_results_list").append(`
+					<div class="beca_loader_wrapper">
+						<div class="beca_loader">
+							<div></div><div></div><div></div><div></div>
+						</div>
+					</div>	
+				`);
+				$(".beca_grid_container").hover(function () {
+					nsObj.toggleActive($(this))
+				});													
 				$(".beca_results_about").each(function () {
 					let wordArray = $(this).html().split(' ');
-					while($(this).scrollHeight > $(this).offsetHeight) {
+					while($(this).outerHeight() > $(this).offsetHeight) {
 						wordArray.pop();
 						$(this).html(wordArray.join(' ') + '...');
 			 		}
 				});
+				$("#beca_results_list").on("scroll", function() {
+					if ($(this).scrollTop() == $(this).prop("scrollHeight") - $(this).height() && nsObj.hasMoreResults() && loading === false) {
+						nsObj.loadResults();
+					}
+				});
 			}
 		}
 		nsObj.buildRow = function(hit) {
-			const about = nsObj.regFirstWords(hit.custom_fields.about, 40);
-			const categories = nsObj.assignType(hit.custom_fields.categories);		
+			const about = hit.custom_fields.about ? nsObj.regFirstWords(hit.custom_fields.about, 40) : '';
+			const categories = hit.custom_fields.categories ? nsObj.assignType(hit.custom_fields.categories) : '';		
 			const courses = hit.custom_fields.courses ?? '';
 			return $("#beca_results_list").append(`
 				<div class="beca_grid_container">
@@ -139,6 +186,11 @@
 					e.stopPropagation();
 				});
 				$(document).on("click", nsObj.hideResults);
+				$("#nextPage").on("click", function () {
+					console.log("Next Page clicked!");
+					client.nextPage();
+					console.log();
+				});
 			});
 		}	
 	} (window.UIsearch = window.UIsearch || {})
